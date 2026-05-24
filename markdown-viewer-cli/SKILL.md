@@ -1,124 +1,129 @@
 ---
 name: markdown-viewer-cli
-description: "Markdown CLI tool — render to HTML, convert to DOCX, live preview. Unified/remark/rehype pipeline with GFM, KaTeX math, syntax highlighting, and themed DOCX export."
-version: 1.0.0
-author: Redliver
-license: MIT
-tags: [markdown, cli, nodejs, docx, unified, remark, rehype]
-triggers:
-  - Converting Markdown to HTML or DOCX
-  - Rendering Markdown with math/code highlighting
-  - Building Markdown processing pipelines
-  - Live preview of Markdown files
-related_skills:
-  - unified-markdown-pipeline
+description: Markdown CLI tool — render to HTML, convert to DOCX, live preview.
+  Unified/remark/rehype pipeline with GFM, KaTeX math, syntax highlighting, and themed DOCX export.
+metadata:
+  source: https://github.com/markdown-viewer/markdown-viewer-extension
 ---
 
-# Markdown Viewer CLI
+# Markdown Viewer CLI (mdv)
 
-Local CLI tool for rendering Markdown to HTML, converting to Word (DOCX), and live preview. No server required — pure CLI commands.
+This skill bundles a portable CLI tool (`mdv`) in the `scripts/` subdirectory.
+**Requires Node.js 18+.** Run the setup script first to install dependencies.
 
 ## Quick Start
 
 ```bash
-# Install dependencies
-cd markdown-viewer-cli/scripts && npm install
+# Run setup (one-time)
+# Windows:
+powershell -ExecutionPolicy Bypass -File scripts/setup.ps1
+# macOS/Linux:
+bash scripts/setup.sh
 
-# Render Markdown → HTML
-node mdv.js render input.md
+# Then use the CLI (from this directory):
+mdv render input.md --view
+mdv convert input.md -t academic
+mdv preview input.md --open
+```
 
-# Convert Markdown → DOCX
-node mdv.js convert input.md
+## Directory Structure
 
-# Live preview (auto-refresh)
-node mdv.js preview input.md
+```
+this-skill-directory/
+├── mdv.bat                Windows: mdv render file.md
+├── mdv                    Unix:    ./mdv render file.md
+├── SKILL.md
+├── scripts/
+│   ├── mdv.js             Entry point (node scripts/mdv.js ...)
+│   ├── render.js          Markdown → HTML pipeline
+│   ├── convert.js         Markdown → DOCX pipeline
+│   ├── preview.js         Live preview HTTP server
+│   ├── package.json       Dependencies
+│   ├── setup.ps1          Windows setup + CLI dependency installer
+│   └── setup.sh           Unix setup + CLI dependency installer
+└── references/
+    └── diagram-syntax.md  PlantUML/Mermaid/DOT cheat sheet
 ```
 
 ## Commands
 
-| Command | Description | Example |
-|---------|-------------|---------|
-| `render` | MD → HTML (full document or fragment) | `node mdv.js render doc.md --view` |
-| `convert` | MD → DOCX with themed styling | `node mdv.js convert doc.md --theme academic` |
-| `preview` | Live HTTP preview with auto-refresh | `node mdv.js preview doc.md -p 8899` |
-| `batch` | Batch convert all .md in a directory | `node mdv.js batch ./docs --format docx` |
-| `themes` | List available DOCX themes | `node mdv.js themes` |
+| Command | Description |
+|---------|-------------|
+| `render` | Render Markdown to HTML (full page or fragment) |
+| `convert` | Convert Markdown to Word (.docx) with themed styling |
+| `preview` | Start live preview server with auto-refresh |
+| `themes` | List available DOCX themes |
+| `batch` | Batch convert all .md files in a directory |
 
-## Render Options
+### render
 
 ```
 mdv render <file> [options]
-
-  -o, --output <path>    Output file path (default: <input>.html)
-  --view                 Open in browser after rendering
-  --no-math              Disable KaTeX math rendering
-  --no-breaks            Disable GFM line breaks
-  --fragment             Output HTML fragment (no document wrapper)
 ```
 
-## Convert Options
+| Option | Default | Description |
+|--------|---------|-------------|
+| `-o, --output <path>` | `<file>.html` | Output file path |
+| `--view` | — | Open in default browser |
+| `--no-math` | enabled | Disable KaTeX math rendering |
+| `--no-breaks` | enabled | Disable GFM line breaks |
+| `--fragment` | — | Output HTML fragment only |
+
+### convert
 
 ```
 mdv convert <file> [options]
-
-  -o, --output <path>    Output DOCX path
-  -t, --theme <name>     Theme: default | academic | warm | modern
-  --title <title>        Document title
 ```
 
-## DOCX Themes
+| Option | Default | Description |
+|--------|---------|-------------|
+| `-o, --output <path>` | `<file>.docx` | Output DOCX path |
+| `-t, --theme <name>` | `default` | DOCX theme |
+| `--title <title>` | filename | Document title |
 
-| Theme | Style |
-|-------|-------|
-| `default` | Clean blue accent (GitHub-style) |
-| `academic` | Formal navy blue for papers |
-| `warm` | Warm amber tones |
-| `modern` | Purple accent, modern feel |
+**Themes:** `default` (blue), `academic` (navy), `warm` (amber), `modern` (purple)
 
-## Architecture
-
-```
-scripts/
-├── mdv.js           CLI entry (commander)
-├── render.js        MD → HTML pipeline (unified/remark/rehype)
-├── convert.js       MD → DOCX (remark AST → docx lib)
-└── preview.js       Live preview HTTP server
-```
-
-## Pipeline
+### preview
 
 ```
-Markdown → [remark-parse] → MDAST
-  → [remark-gfm] → MDAST+GFM (tables, tasks, strikethrough)
-  → [remark-math] → MDAST+Math ($...$, $$...$$)
-  → [remark-rehype] → HAST (bridge!)
-  → [rehype-highlight] → code syntax highlighting
-  → [rehype-katex] → math rendering
-  → [rehype-slug] → heading IDs
-  → [rehype-stringify] → HTML
+mdv preview <file> [options]
 ```
 
-**Critical**: `remark-rehype` is the bridge between remark (MDAST) and rehype (HAST). Without it, you get `"Cannot compile heading node"` errors.
+| Option | Default | Description |
+|--------|---------|-------------|
+| `-p, --port <number>` | `8899` | Server port |
+| `--open` | — | Open browser automatically |
 
-## Key Dependencies
+### batch
 
-- `unified`, `remark-parse`, `remark-gfm`, `remark-math` — Markdown parsing
-- `remark-rehype` — MDAST → HAST bridge (required!)
-- `rehype-highlight`, `rehype-katex`, `rehype-slug`, `rehype-stringify` — HTML rendering
-- `docx` — Word document generation
-- `commander` — CLI argument parsing
-
-## Pitfalls
-
-1. **Missing `remark-rehype`**: Causes `"Cannot compile heading node"` — always include it between remark and rehype plugins
-2. **`docx` exports**: v9 does NOT export `EquationRun`, `MathRun`, `MathFraction`, etc. Only import what exists
-3. **KaTeX in DOCX**: Falls back to plain text (no native math rendering via docx lib)
-4. **Cold start**: First npm module loading can be slow — subsequent calls are fast
-5. **Node warnings**: Use `NODE_NO_WARNINGS=1` to suppress experimental warnings
-6. **China npm mirror**: Use `npm install --registry https://registry.npmmirror.com`
-
-## npm install (China)
-
-```bash
-npm install --registry https://registry.npmmirror.com
 ```
+mdv batch <dir> [options]
+```
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `--format <fmt>` | `html` | `html` or `docx` |
+| `-t, --theme <name>` | `default` | DOCX theme |
+
+## Features
+
+- **Diagrams:** PlantUML, Mermaid.js, Graphviz (DOT) rendered inline to SVG/PNG
+- **Math:** KaTeX (LaTeX in `$$` / `$` delimiters)
+- **Syntax highlighting:** highlight.js for code blocks
+- **GFM:** Tables, task lists, strikethrough, autolinks
+- **DOCX themes:** 4 color themes
+
+## Diagram Fences
+
+| Language | Fence | Renderer |
+|----------|-------|----------|
+| PlantUML | ` ```plantuml ` / ` ```puml ` | Local draw-uml, fallback kroki.io |
+| Mermaid | ` ```mermaid ` | Local mermaid.js |
+| Graphviz | ` ```dot ` / ` ```graphviz ` | Local @viz-js/viz |
+
+## Cross-Platform Notes
+
+- **Windows:** `mdv render file.md` (uses `mdv.bat` → `scripts/mdv.js`)
+- **macOS/Linux:** `./mdv render file.md` (uses `mdv` shell script → `scripts/mdv.js`, `chmod +x` if needed)
+- All paths are relative to this skill directory — no hardcoded paths
+- For system-wide access, add this directory to your PATH

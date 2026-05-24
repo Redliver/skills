@@ -13,6 +13,10 @@
  *   mdv themes                     List available DOCX themes
  */
 
+// Register tsx for TypeScript support (needed for @markdown-viewer/draw-uml and drawio2svg)
+import { register } from 'tsx/esm/api';
+register();
+
 import { Command } from 'commander';
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { resolve, basename, dirname, extname, join } from 'path';

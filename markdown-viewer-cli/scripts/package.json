@@ -1,19 +1,29 @@
 {
-  "name": "markdown-viewer-cli",
+  "name": "mdv-cli",
   "version": "1.0.0",
-  "description": "Markdown CLI tool — render to HTML, convert to DOCX, live preview",
+  "description": "Markdown CLI tool — render to HTML, convert to DOCX, live preview. Based on markdown-viewer-extension.",
   "type": "module",
   "bin": {
     "mdv": "./mdv.js"
   },
   "scripts": {
+    "render": "node mdv.js render",
+    "convert": "node mdv.js convert",
+    "preview": "node mdv.js preview",
     "test": "node mdv.js themes"
   },
   "dependencies": {
+    "@markdown-viewer/draw-uml": "^1.2.0",
+    "@markdown-viewer/drawio2svg": "^1.5.1",
+    "@viz-js/viz": "^3.27.0",
+    "@xmldom/xmldom": "^0.9.10",
     "commander": "^12.1.0",
     "docx": "^9.5.1",
     "highlight.js": "^11.10.0",
     "katex": "^0.16.11",
+    "linkedom": "^0.18.12",
+    "mermaid": "^11.15.0",
+    "plantuml-encoder": "^1.4.0",
     "rehype-external-links": "^3.0.0",
     "rehype-highlight": "^7.0.1",
     "rehype-katex": "^7.0.1",
@@ -23,6 +33,9 @@
     "remark-math": "^6.0.0",
     "remark-parse": "^11.0.0",
     "remark-rehype": "^11.0.0",
-    "unified": "^11.0.4"
+    "sharp": "^0.34.5",
+    "tsx": "^4.22.3",
+    "unified": "^11.0.4",
+    "unist-util-visit": "^5.1.0"
   }
 }
